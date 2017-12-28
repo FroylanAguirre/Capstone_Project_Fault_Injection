@@ -1,67 +1,41 @@
+#gui_format.py
 from tkinter import filedialog
 from tkinter import *
+from tkinter import ttk
+from ProjDirLblFr import *
 import os
 
-class Gui_format:
+"""
+Arranges all necessary frames for the top level window.
+"""
 
-    def __init__(self):
-        self.root = Tk()
-        self.root.title("Memory Stats")
-        self.buttonFrame = Frame()
-        self.buttonFrame.pack()
+class Gui_format(Frame):
 
-        self.projDirButton = \
-            Button(self.buttonFrame,
-                   text="Project File",
-                   takefocus=0)
-        self.projDirButton.pack(side=LEFT)
+    def __init__(self, master=None):
+        #self.root = Tk()
+        #self.root.title("Memory Stats")
+        Frame.__init__(self, master)
+        self.pack(fill="both")
 
-        self.redoButton = \
-            Button(self.buttonFrame,
-                   text="Update",
-                   takefocus=0)
-        self.redoButton.pack(side=LEFT)
+        self.dirConfig = DirButtonsFr(self)
 
-        self.pathname = StringVar()
-        self.pathname.set("No project file selected.")
-        #self.pathname.trace("w", projectInfo)
+        self.proj_dir = ProjDirLblFr(self)
 
-        self.pathLabel = Label(self.root, textvariable=self.pathname, anchor=W)
-        self.pathLabel.pack(fill="both")
+        self.glblVars = GlobalVarsDisplayLblFr(self)
 
+        self.stackTable = StackTableLblFr(self)
 
-        self.gblLblFr = LabelFrame(self.root, labelanchor="nw",
-                                    text="Globals", padx=10, pady=5)
-        self.gblLblFr.pack(fill="both")
+        #might be used in future,not sure
+        #self.funcNamePndWin = PanedWindow(self.stackLblFr, sashrelief="raised")
+        #self.funcNamePndWin.pack(fill="x")
 
-        self.globalText = Text(self.gblLblFr, font='Consolas')
-        self.globalText.pack(fill="both")
-        self.globalText.insert(END, "This is a text box.\n")
+        #self.stackNameText = Text(self.stackLblFr)
+        #self.stackNameText.insert(END, "Function name.\n")
+        #self.funcNamePndWin.add(self.stackNameText)
 
-        self.stackLblFr = LabelFrame(self.root, labelanchor="nw",
-                                    text="Function Stack Use", padx=10, pady=5)
-        self.stackLblFr.pack(fill="both")
+        #self.funcFilePndWin = PanedWindow(self.stackLblFr, sashrelief="raised")
+        #self.funcFilePndWin.pack(fill="x")
 
-        #self.stackText = Text(self.stackLblFr)
-        #self.stackText.pack(fill="both")
-        #self.stackText.insert(END, "Stack info here.\n")
-
-        self.funcNamePndWin = PanedWindow(self.stackLblFr, sashrelief="raised")
-        self.funcNamePndWin.pack(fill="x")
-
-        self.stackNameText = Text(self.stackLblFr)
-        self.stackNameText.insert(END, "Function name.\n")
-        self.funcNamePndWin.add(self.stackNameText)
-
-        self.funcFilePndWin = PanedWindow(self.stackLblFr, sashrelief="raised")
-        self.funcFilePndWin.pack(fill="x")
-
-        self.stackFileText = Text(self.stackLblFr)
-        self.stackFileText.insert(END, "Function file.\n")
-        self.funcNamePndWin.add(self.stackFileText)
-
-    def updateFileLabel(self, path):
-        if (path != None):
-            self.pathname.set(path)
-        else:
-            self.pathname.set("Invalid project file selected.")
+        #self.stackFileText = Text(self.stackLblFr)
+        #self.stackFileText.insert(END, "Function file.\n")
+        #self.funcNamePndWin.add(self.stackFileText)

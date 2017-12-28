@@ -1,14 +1,21 @@
+#first
+
 from tkinter import filedialog
 from tkinter import *
 import os
 from gui_format import Gui_format
 from proj_stats import Proj_Stats
+import re
 
-REQ_PROJECT_DIR_LIST = (".settings", "Debug",
-                        "Drivers", "Inc",
-                        "Src", "startup")
+"""
+Top level logic.
+Reminder that we are using version 8.6 of Tkinter.
+"""
+
+MAIN_O_FILE_TOKEN = "Src/main.o"
 
 def check_list_intersection(listA, listB):
+    """ Returns true if the lists have at least one element in common. """
     nonzero_intersection = False
 
     i = set.intersection(set(listA), set(listB))
@@ -21,16 +28,16 @@ def check_list_intersection(listA, listB):
 def readPrintOutputMap(filePath):
     print("Reading and Printing the output.map file")
 
-    lineList = [""]
+    lineList = []
     mapfile = open(filePath, "r")
 
     if (mapfile.mode != 'r'):
         print("File not properly opened.")
         quit()
 
-    prevLine = "lala"
-    line = "lala"
-    tokenlist = ['one', 'two']
+    prevLine = ""
+    line = " "
+    tokenlist = []
     mainStr = 'Src/main.o'
     flag = False
 
@@ -42,25 +49,27 @@ def readPrintOutputMap(filePath):
 
         tokenlist = line.split()
 
-        if (mainStr in tokenlist):
+        if (len(tokenlist) == 0):
+            continue
+
+        if (re.search("Src/\w+[.]o", tokenlist[-1])):
             prevLine = line
-        elif (check_list_intersection(tokenlist, vars)):
+            flag = True
+            continue
 
-            if (not flag):
-                #print("%s" % prevLine)
-                lineList.append(prevLine)
-                flag = True
+        if (flag):
+            if (tokenlist[0].startswith("0x2")): #only SRAM locations for now
+                if (prevLine != None):
+                    lineList.append(prevLine)
+                    prevLine = None
 
-            #print("%s" % line)
-            lineList.append(line)
-        else:
-            flag = False
+                lineList.append(line)
+            else:
+                flag = False
 
     mapfile.close()
 
-    #print("lineList = %d" % len(lineList))
-
-    if (len(lineList) == 1): #fix this later, dont know why it returns newline when nothing found
+    if (len(lineList) == 0):
         lineList.append("No global variables found.")
 
     return lineList
@@ -117,66 +126,42 @@ def parseStackData():
 
     return formatedOutput
 
-def isValidProject(selPath, dirlist):
-    isvalid = True
-    reqDirs = [os.path.join(selPath, child) for child in REQ_PROJECT_DIR_LIST]
+def updateProjMemStats():
+    if (not proj.isValidProj):
+        return None
 
-    for dirname in reqDirs:
-        if (not (dirname in dirlist)):
-            isvalid = False
-            print("%s was not found" % dirname)
-            break
-
-    return isvalid
+    toPrint = readPrintOutputMap(os.path.join(proj.projPath, "Debug/output.map"))
+    toStackText = parseStackData()
+    gui.stackTable.populateTable(toStackText)
+    gui.glblVars.displayGlobalVars(toPrint)
 
 def projSelButtonPress():
     print("BUTTON PRESSED")
-    name = filedialog.askdirectory(parent=gui.root)
-    #gui.pathname.set(name)
+    name = filedialog.askdirectory(parent=gui)
 
-    dirlist = []
-    dirlist = os.listdir(name)
-
-    pathlist = [os.path.join(name, child) for child in dirlist]
-    dirFilterObject = filter(os.path.isdir, pathlist)
-
-    directories = list(dirFilterObject)
-
-    print("%s" % dirlist)
-    print("%s" % pathlist)
-
-    if isValidProject(name, directories):
+    if proj.isValidProject(name):
         print("IS VALID")
-        print("directories: %s" % directories)
+        #print("directories: %s" % directories)
 
         proj.isValidProj = True
         proj.projPath = name
 
-        gui.updateFileLabel(name)
-
-        toPrint = readPrintOutputMap(os.path.join(name, "Debug/output.map"))
-
-        #toStackText = parseStackData()
-
-        gui.globalText.delete('1.0', END)
-
-        for line in toPrint:
-            gui.globalText.insert(END, line)
-
-        #for datum in toStackText:
-        #    gui.stackText.insert(END, "  " + datum)
-
+        gui.proj_dir.updateFileLabel(name)
+        updateProjMemStats()
     else:
         print("Project file NOT valid")
-        projSelected = False
-        gui.updateFileLabel(None)
+        proj.isValidProj = False
+        gui.proj_dir.updateFileLabel(None)
 
 def redoButtonPress():
-    print("WILL REDO")
+    if (not proj.isValidProj):
+        print("Project file NOT valid") #used for debug
+        gui.proj_dir.updateFileLabel(None)
+    else:
+        print("Will redo.")
+        updateProjMemStats()
 
 #================================================
-
-#TODO: Format stack info.
 
 print("Finding stuff")
 vars = ['ptr', 'tic', 'tac']
@@ -185,45 +170,14 @@ toPrint = ""
 
 proj = Proj_Stats()
 
-gui = Gui_format()
+root = Tk()
+root.title("Memory Stats")
+gui = Gui_format(master=root)
 
-gui.projDirButton.configure(command=projSelButtonPress)
-gui.redoButton.configure(command=redoButtonPress)
+#Set button actions.
+gui.dirConfig.projDirButton.configure(command=projSelButtonPress)
+gui.dirConfig.redoButton.configure(command=redoButtonPress)
 
-#projSelected = False
-#root = Tk()
-#root.title("Memory Stats")
+#gui.root.tk.eval('puts "hello, pls work"')
 
-#pathname = StringVar()
-#pathname.set("this better work")
-#labelList = []
-#idx = True
-
-#button = Button(root, text="Project File",
-#                command=buttonPressed,
-#                takefocus=0)
-#button.pack(fill="both")
-
-#pathLabel = Label(root, textvariable=pathname, anchor=W)
-#pathLabel.pack(fill="both")
-#pathname = "plz work"
-
-#textBox = Text(root, font='Consolas')
-#textBox.pack(fill="both")
-#textBox.insert(END, "This is a text box.\n")
-
-#for line in toPrint:
-#    textBox.insert(END, line)
-
-#for line in toPrint:
-#    if (idx):
-#        labelList.append(
-#            Label(root, text = line.rstrip(), anchor = W))
-#    else:
-#        labelList.append(
-#            Label(root, text = line.rstrip(), anchor = W))
-#
-#    labelList[-1].pack(fill="both")
-#    idx = not idx
-
-gui.root.mainloop()
+gui.mainloop()

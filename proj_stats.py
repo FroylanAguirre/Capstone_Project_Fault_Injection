@@ -14,3 +14,25 @@ class Proj_Stats:
         #self.projPath.trace("w",self.isValidProject())
         self.isValidProj = False
 
+    def isValidProject(self, selPath):
+        isvalid = True
+        reqDirs = [os.path.join(selPath, child) for child in REQ_PROJECT_DIR_LIST]
+
+        dirlist = []
+        dirlist = os.listdir(selPath)
+
+        pathlist = [os.path.join(selPath, child) for child in dirlist]
+        dirFilterObject = filter(os.path.isdir, pathlist)
+
+        dirlist = list(dirFilterObject)
+
+        print("%s" % dirlist)
+        print("%s" % pathlist)
+
+        for dirname in reqDirs:
+            if (not (dirname in dirlist)):
+                isvalid = False
+                print("%s was not found" % dirname)
+                break
+
+        return isvalid
