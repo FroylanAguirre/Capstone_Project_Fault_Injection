@@ -11,4 +11,5 @@ IMPORTANT: From now on, widgets must be enclosed within a subclass of Frame
 	displayed data. Plus this makes rearranging the GUI easier in the future
 	if its needed. 
 	For example, a Frame subclass would contain a heat map and the methods
-	necessary to configure it.
+	necessary to configure it.   
+

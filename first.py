@@ -5,7 +5,12 @@ from tkinter import *
 import os
 from gui_format import Gui_format
 from proj_stats import Proj_Stats
+from top_window import Top_Frame
 import re
+import matplotlib
+import socket
+from tcl_port_coms import Tcl_Port
+from fault_injection_stats import FaultInjectionStats
 
 """
 Top level logic.
@@ -112,7 +117,7 @@ def parseStackData():
     while (line != ""):
         line = suFile.readline()
 
-        if (len(line) == 0):
+        if len(line) == 0:
             break
 
         tokenAlist = line.split()
@@ -132,12 +137,14 @@ def updateProjMemStats():
 
     toPrint = readPrintOutputMap(os.path.join(proj.projPath, "Debug/output.map"))
     toStackText = parseStackData()
-    gui.stackTable.populateTable(toStackText)
-    gui.glblVars.displayGlobalVars(toPrint)
+    gui.tab1.stackTable.populateTable(toStackText)
+    gui.tab1.glblVars.displayGlobalVars(toPrint)
 
 def projSelButtonPress():
     print("BUTTON PRESSED")
-    name = filedialog.askdirectory(parent=gui)
+    name = filedialog.askdirectory(parent=gui.tab1)
+
+    print("X" + name + "X")
 
     if proj.isValidProject(name):
         print("IS VALID")
@@ -146,17 +153,17 @@ def projSelButtonPress():
         proj.isValidProj = True
         proj.projPath = name
 
-        gui.proj_dir.updateFileLabel(name)
+        gui.tab1.proj_dir.updateFileLabel(name)
         updateProjMemStats()
     else:
         print("Project file NOT valid")
         proj.isValidProj = False
-        gui.proj_dir.updateFileLabel(None)
+        gui.tab1.proj_dir.updateFileLabel(None)
 
 def redoButtonPress():
     if (not proj.isValidProj):
         print("Project file NOT valid") #used for debug
-        gui.proj_dir.updateFileLabel(None)
+        gui.tab1.proj_dir.updateFileLabel(None)
     else:
         print("Will redo.")
         updateProjMemStats()
@@ -169,15 +176,47 @@ vars = ['ptr', 'tic', 'tac']
 toPrint = ""
 
 proj = Proj_Stats()
+fi = FaultInjectionStats(proj)
 
+#matplotlib.use("TkAgg")
 root = Tk()
 root.title("Memory Stats")
-gui = Gui_format(master=root)
+#gui = Gui_format(master=root)
+
+tcl_port = Tcl_Port()
+
+gui = Top_Frame(root, tcl_port, proj, fi)
 
 #Set button actions.
-gui.dirConfig.projDirButton.configure(command=projSelButtonPress)
-gui.dirConfig.redoButton.configure(command=redoButtonPress)
+gui.tab1.dirConfig.projDirButton.configure(command=projSelButtonPress)
+gui.tab1.dirConfig.redoButton.configure(command=redoButtonPress)
 
-#gui.root.tk.eval('puts "hello, pls work"')
+
+
+# root.tk.eval('puts "hello, pls work"')
+# root.tk.eval('source tcl_script.tcl')
+# root.tk.eval('puts "DONE"')
+
+# TCP_IP = '127.0.0.1'
+# TCP_PORT = 6666
+# BUFFER_SIZE = 1024
+# MESSAGE = "Hello, World!"
+#
+# host = socket.gethostname()
+# print("host: ", host)
+# s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# conState = s.connect_ex(('localhost', TCP_PORT))
+# print("conState: ", conState)
+#
+# sendState = s.sendall(b"echo Hello_there")
+# print("sendState: ", sendState)
+# sendState = s.sendall(b"reset run")
+# print("sendState: ", sendState)
+#
+# data = "Nothing received."
+# #data = s.recv(BUFFER_SIZE)
+#
+# s.close()
+# print("received data:", data)
 
 gui.mainloop()
