@@ -1,4 +1,4 @@
-# Capstone_Project_Fault_Injection_GUI
+# Capstone_Project_Fault_Injection
 GUI for Capstone project that will output revelant memory stats.
 
 More specifically, it parses info from the output.map (global variable location and size) and .su file (functions and their stack
