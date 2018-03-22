@@ -1,7 +1,10 @@
-from tkinter import *
-from tkinter import ttk
 from gui_format import *
 from proj_stats import *
+
+'''
+top_window.py
+Sets up all tabs for the top window.
+'''
 
 class Top_Frame(Frame):
 
@@ -20,16 +23,9 @@ class Top_Frame(Frame):
         self.tab1 = Gui_format()
         tabber.add(self.tab1, text="ProjectInfo")
 
-        #self.tab2 = Graph_Tab()
-        #tabber.add(self.tab2, text="Empty Tab")
-
+        # the Tcl Terminal tab, a nice novelty, but not very useful yet
         # self.tab2 = tclPortObj.create_gui(master)
         # tabber.add(self.tab2, text='Tcl Terminal')
 
         tab4 = fi_info.create_gui(master)
         tabber.add(tab4, text="Fault Injection")
-
-        # self.tab3 = Graph_Tab(self)
-        # tabber.add(self.tab3, text="Graphs")
-
-

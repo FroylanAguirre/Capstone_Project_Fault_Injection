@@ -1,18 +1,21 @@
 from tkinter import *
-# from tkinter import Frame
-# from tkinter import Label
-# from tkinter import Entry
-# from tkinter import IntVar
-# from tkinter import LabelFrame
-# from tkinter import StringVar
-# from tkinter import Checkbutton
-# from tkinter import Button
 from tkinter import _tkerror
 from tkinter import Radiobutton
 from tkinter import messagebox
+from tkinter.filedialog import askopenfilename
 import re
 import random
 from enum import Enum
+import xml.etree.ElementTree as ET
+import matplotlib.pyplot as plt
+import sample_parser as spl
+import os
+
+'''
+fault_injection_stats.py
+Takes care of configuration file generation and input from "Fault Injection" tab.
+'''
+
 
 class FaultInjectionStats:
 
@@ -36,23 +39,7 @@ class FaultInjectionStats:
         self.rand_var = None # dict of IntVal, selects if variable varies randomly
         self.var_val_sel = self.VarSel.addr.value #enum VarSel, selects variable quantity
         self.test_number = 0
-        self.bit_pos = None #, selects a constant bit position [0, 7]
-
-    def create_sample_list(self):
-        pass
-
-    def get_integer(self, stringVal):
-        base = 10
-        if stringVal.startswith('0x'):
-            base = 16
-
-        value = 0
-        try:
-            value = int(stringVal)
-        except _tkerror.TclError:
-            value = None
-
-        return value
+        self.bit_pos = None # selects a constant bit position [0, 7]
 
     def create_config_file(self):
 
@@ -95,7 +82,7 @@ class FaultInjectionStats:
         self.project_name.set(p_name)
 
     def write_config_file(self, config_f):
-        samples_filename = self.project.config_sampling_dir.get() + "/"
+        samples_filename = self.project.sample_dir.get() + "/"
         samples_filename += self.project_name.get() + "_samples.txt\n"
         config_f.write(samples_filename)
 
@@ -107,45 +94,57 @@ class FaultInjectionStats:
         config_f.write(str(self.bp_list['inj'].get()) + ' ')
         config_f.write(str(self.bp_list['smpl'].get()))
 
-        # delta = {'time':0,
-        #          'mem':0,
-        #          'reg':0} # only used for non-random, varying fault parameters
         delta = 0 # only used for non-random, varying fault parameters
         param_addr = 0
         param_time = 0
         param_bit = 0
         change_fault_param = self.var_val_sel.get()
         break_flag = False
+        bit_range = FaultParam()
+        bit_range.min = IntVar()
+        bit_range.max = IntVar()
+        bit_range.min.set(0)
+        bit_range.max.set(7)
         for n in range(0, self.num_inj.get()):
-            #config_f.write("\n")
-            if change_fault_param == self.VarSel.inj_time.value:
-               param_time = self.generate_param_value(self.fault_ranges['time'],
+
+            #if change_fault_param == self.VarSel.inj_time.value:
+
+            if (self.rand_var.get()) or (change_fault_param == self.VarSel.inj_time.value):
+                param_time = self.generate_param_value(self.fault_ranges['time'],
                                                        random_on=self.rand_var.get(),
                                                        delta=delta)
             else:
                 param_time = self.fault_ranges['time'].min.get()
 
-            if param_time is None: break
+            #if param_time is None: break
 
-            if change_fault_param == self.VarSel.addr.value:
-               param_addr = self.generate_param_value(self.fault_ranges['mem'],
+            #if change_fault_param == self.VarSel.addr.value:
+            if (self.rand_var.get()) or (change_fault_param == self.VarSel.addr.value):
+                param_addr = self.generate_param_value(self.fault_ranges['mem'],
                                                        random_on=self.rand_var.get(),
                                                        delta=delta)
             else:
                 param_addr = self.fault_ranges['mem'].min.get()
 
-            if param_addr is None: break
+            #if param_addr is None: break
 
-            if change_fault_param == self.VarSel.bit_pos.value:
-                param_bit = delta
+            #if change_fault_param == self.VarSel.bit_pos.value:
+                #param_bit = delta
+            if (self.rand_var.get()) or (change_fault_param == self.VarSel.bit_pos.value):
+                param_bit = self.generate_param_value(bit_range,
+                                                      random_on=self.rand_var.get(),
+                                                      delta=delta)
             else:
                 param_bit = self.bit_pos.get()
+
+            if (param_addr is None) or (param_time is None): break
+            if param_bit is None: break
 
             config_f.write("\n")
             config_f.write(str(param_time) + " " + str(param_addr) + " ")
             config_f.write(str(param_bit))
 
-            if (param_bit == 7) and (change_fault_param == self.VarSel.bit_pos.value): break
+            #if (param_bit == 7) and (change_fault_param == self.VarSel.bit_pos.value): break
 
             delta += 1
 
@@ -157,7 +156,7 @@ class FaultInjectionStats:
         :return: new value
         """
         if random_on:
-            value = random.randint(fault_param.min.get(), fault_param.max.get() + 1)
+            value = random.randint(fault_param.min.get(), fault_param.max.get())
         else:
             value = fault_param.min.get() + delta
             if value > fault_param.max.get():
@@ -165,10 +164,26 @@ class FaultInjectionStats:
 
         return value
 
+    def create_graph(self):
+        # this opens the three plots
+        # not the ideal way, but the only one that works
+        # but there is a catch, you HAVE to close all windows before you return to the main window
+        #   or else the program crashes
+        sample_filename = askopenfilename(title="Choose Sample Output File")
+        os.system("python xml_testing.py " + sample_filename)
+
     def create_gui(self, master):
+        '''
+        Responsible for gui element setup.
+        :param master: Tk root
+        :return: "Fault Injection" tab frame
+        '''
+
+        self.tk_root = master
         fiFrame = Frame(master)
         fiFrame.pack(fill="none")
 
+        # series of gui set up functions
         self.proj_name_subframe(fiFrame)
         self.bit_pos_radiobutton(fiFrame)
 
@@ -178,14 +193,17 @@ class FaultInjectionStats:
         self.general_options_subframe(fiFrame)
         self.variable_quantity_subframe(fiFrame)
 
-        #self.bit_pos_radiobutton(fiFrame)
-
         create_config_bttn = Button(fiFrame,
                                     text="Create Config File",
                                     takefocus=0,
                                     command=self.create_config_file)
-        #create_config_bttn.pack()
         create_config_bttn.grid(row=3, column=1)
+
+        graph_bttn = Button(fiFrame,
+                                    text="Create Graphs",
+                                    takefocus=0,
+                                    command=self.create_graph)
+        graph_bttn.grid(row=3, column=0)
 
         return fiFrame
 
@@ -234,8 +252,11 @@ class FaultInjectionStats:
         return True
 
     def bit_pos_radiobutton(self, master):
+        '''
+        Another gui setup helper function.
+        '''
+
         label_frame = LabelFrame(master, text="Bit Postion Selection")
-        #label_frame.pack(side='left', anchor='n')
         label_frame.grid(row=0, column=1)
 
         self.bit_pos = IntVar()
@@ -251,6 +272,10 @@ class FaultInjectionStats:
         self.bit_pos.set(0)
 
     def variable_quantity_subframe(self, master):
+        '''
+        Another gui setup helper function.
+        '''
+
         label_frame = LabelFrame(master, text="Variable Quantity Selection")
         #label_frame.pack()
         label_frame.grid(row=2, column=1)
@@ -277,6 +302,10 @@ class FaultInjectionStats:
         self.var_val_sel.set(self.VarSel.addr.value)
 
     def general_options_subframe(self, master):
+        '''
+        Another gui setup helper function.
+        '''
+
         op_frame = LabelFrame(master, text="General Options")
         #op_frame.pack(ipadx=5)
         op_frame.grid(row=2, column=0)
@@ -309,6 +338,10 @@ class FaultInjectionStats:
         cb3.pack()
 
     def proj_name_subframe(self, master):
+        '''
+        Another gui setup helper function.
+        '''
+
         proj_name = LabelFrame(master,
                                text="Project Name",
                                padx=5,
@@ -320,6 +353,10 @@ class FaultInjectionStats:
         entry1.pack()
 
     def breakpoint_timeout_subframe(self, master):
+        '''
+        Another gui setup helper function.
+        '''
+
         bt_frame = LabelFrame(master,
                               text="Breakpoint Addresses and Timeouts",
                               padx=10,
@@ -365,6 +402,10 @@ class FaultInjectionStats:
         entry6.grid(row=3, column=2)
 
     def fault_range_subframe(self, master):
+        '''
+        Another gui setup helper function.
+        '''
+
         f_frame = LabelFrame(master,
                              text="Fault Parameter Ranges",
                              padx=10,
@@ -409,8 +450,106 @@ class FaultInjectionStats:
         entry6 = Entry(f_frame, textvariable=self.fault_ranges['reg'].max)
         entry6.grid(row=3, column=2)
 
+    # def plot_data(self):
+    #     '''
+    #     Called to create the three plots.
+    #     :return:
+    #     '''
+    #     print("Starting XML Parsing....")
+    #     regs = spl.CpuRegs()
+    #     p = spl.SampleParser()
+    #
+    #     sample_filename = askopenfilename(title="Choose Sample Output File")
+    #     with open(sample_filename) as xml_file:
+    #         injectParse = ET.parse(xml_file)
+    #
+    #     samples = injectParse.getroot()
+    #
+    #     num_samples = len(samples) - 1
+    #     num_global_var = len(samples[0][3])
+    #     reg_err = []
+    #     heap_err = []
+    #     stack_err = []
+    #     errCnt = 0
+    #     heapCnt = []
+    #     seq_loss_errs = []
+    #
+    #     try:
+    #         val_listA = samples[0][3][0].text.split(' ')
+    #         addrErrs = [0] * len(val_listA)
+    #         for idx in range(1, num_samples):
+    #             errCnt = p.diff_regs(samples[0], samples[idx])
+    #             reg_err.append(errCnt)
+    #
+    #             heapCnt = p.diff_heap(samples[0], samples[idx], num_global_var)
+    #             heap_err.append(heapCnt)
+    #
+    #             addrErrs = p.addr_errs(samples[0], samples[idx], addrErrs)
+    #
+    #             is_seq_loss = p.is_seq_loss(samples[idx])
+    #             seq_loss_errs.append(is_seq_loss)
+    #
+    #         print("Register Errors")
+    #         print(reg_err)
+    #
+    #         print("Heap Errors")
+    #         print(heap_err)
+    #
+    #         print("Sequence Loss Errors")
+    #         print(seq_loss_errs)
+    #
+    #         addrs_a = []
+    #         addrs_b = []
+    #
+    #         tims_a = []
+    #         tims_b = []
+    #
+    #         errs_a = []
+    #         errs_b = []
+    #
+    #         for i in range(len(heap_err)):
+    #             if seq_loss_errs[i] > 0:
+    #                 errs_b.append(heap_err[i][0][0])
+    #                 addrs_b.append(heap_err[i][1])
+    #                 tims_b.append(heap_err[i][2])
+    #             else:
+    #                 errs_a.append(heap_err[i][0][0])
+    #                 addrs_a.append(heap_err[i][1])
+    #                 tims_a.append(heap_err[i][2])
+    #
+    #         print(tims_a, tims_b)
+    #         err_plot = plt.figure(1)
+    #         plt.plot(addrErrs, 'r')
+    #         plt.xlabel("SRAM address (0x20000000 offset)")
+    #         plt.ylabel("Error Count")
+    #         plt.title("Address Error Accumulation")
+    #         plt.grid()
+    #
+    #         tim_plot = plt.figure(2)
+    #         plt.plot(tims_a, errs_a, 'b.')
+    #         plt.plot(tims_b, errs_b, 'bs')
+    #         plt.xlabel("Injection Time (timer counts)")
+    #         plt.ylabel("Error Count")
+    #         plt.title("Errors v. injection time")
+    #         plt.grid()
+    #
+    #         addr_plot = plt.figure(3)
+    #         plt.plot(addrs_a, errs_a, 'g.')
+    #         plt.plot(addrs_b, errs_b, 'gs')
+    #         plt.xlabel("SRAM address")
+    #         plt.ylabel("Error Count")
+    #         plt.title("Injection Location vs. injection time")
+    #         plt.grid()
+    #         plt.show()
+    #
+    #     except IndexError:
+    #         print("IndexError. End.")
+
 
 class IntVal(StringVar):
+    '''
+    Represents an integer value. Used to read decimal or hex input from widgets.
+    '''
 
     def __init__(self):
         StringVar.__init__(self)
@@ -435,6 +574,9 @@ class IntVal(StringVar):
 
 
 class FaultParam:
+    '''
+    Represents an upper and lower bound for an integer quantity.
+    '''
 
     def __init__(self):
         self.min = None

@@ -1,12 +1,12 @@
-from tkinter import filedialog
 from tkinter import *
 import os
 from tkinter import Frame
-import re
 from tkinter import filedialog
-from gui_format import Gui_format
-from fault_injection_stats import FaultInjectionStats
-# from gui_format import DirSettings
+
+'''
+proj_stats.py
+Responsible for project setup and holds information about important directories for the project. 
+'''
 
 REQ_PROJECT_DIR_LIST = (".settings", "Debug",
                         "Drivers", "Inc",
@@ -17,7 +17,6 @@ class Proj_Stats:
 
     def __init__(self):
         self.projPath = ""
-        #self.projPath.trace("w",self.isValidProject())
         self.isValidProj = False
         self.config_sampling_dir = None
         self.sample_dir = None
@@ -26,18 +25,9 @@ class Proj_Stats:
     @property
     def check_ready_for_config_creation(self):
         if len(self.config_sampling_dir.get()) == 0:
-            print(1)
             return False
         if len(self.sample_dir.get()) == 0:
-            print(2)
             return False
-        if len(self.openocdExe_dir.get()) == 0:
-            print(3)
-            return False
-
-        # if re.search('\s+', self.config_sampling_dir.get()): return False
-        # if re.search('\s+', self.sample_dir.get()): return False
-        # if re.search('\s+', self.openocdExe_dir.get()): return False
 
         return True
 
@@ -57,13 +47,13 @@ class Proj_Stats:
 
         dirlist = list(dirFilterObject)
 
-        print("%s" % dirlist)
-        print("%s" % pathlist)
+        # print("%s" % dirlist)
+        # print("%s" % pathlist)
 
         for dirname in reqDirs:
             if (not (dirname in dirlist)):
                 isvalid = False
-                print("%s was not found" % dirname)
+                # print("%s was not found" % dirname)
                 break
 
         return isvalid
@@ -87,6 +77,11 @@ class Proj_Stats:
             self.openocdExe_dir.set(dir_path)
 
     def create_gui(self, master):
+        '''
+        Sets up gui elements that receive important project information.
+        :param master: Tk root
+        :return: Frame for "Directory Settings" tab.
+        '''
         settingsFrame = Frame(master)
         settingsFrame.pack(fill="both")
 

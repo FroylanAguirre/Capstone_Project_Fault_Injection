@@ -1,8 +1,9 @@
-#ProjDirLblFr.py
 from tkinter import *
 from tkinter import ttk
 
 """
+ProjDirLibFr.py
+Mainly used to setup GUI elements, no program logic here.
 Contains Frame and LabelFrame subclasses that contain necessary widgets.
 They are arranged in the Gui_format class.
 """
