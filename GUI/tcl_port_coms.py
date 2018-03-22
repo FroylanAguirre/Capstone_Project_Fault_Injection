@@ -1,10 +1,22 @@
 import socket
 from gui_format import Tcl_Interface_Tab
+
+'''
+tcl_port_coms.py
+Contains control logic for a machine interface with the Tcl interpreter on OpenOCD.
+Not currently used in project, more of a novelty than anything usefull.
+'''
+
+# default machine interface TCP port
 TCP_PORT = 6666
 
 class Tcl_Port:
 
     def tclPortConnect(self):
+        '''
+        Establishes connection with OpenOCD's machine interface.
+        :return: Nothing
+        '''
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         conState = self.sock.connect_ex(('localhost', TCP_PORT))
 
@@ -16,6 +28,11 @@ class Tcl_Port:
             self.tcl_gui.printToTclTerminal("Connection failure.")
 
     def sendTclCmd(self, cmd):
+        '''
+        Sends a command string to OpenOCD.
+        :param cmd: an OpenOCD command
+        :return: result of OpenOCD command
+        '''
         if (self.isConnected):
             cmdLength = len(cmd) + 1
 
