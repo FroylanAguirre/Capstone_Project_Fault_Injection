@@ -107,8 +107,6 @@ class FaultInjectionStats:
         bit_range.max.set(7)
         for n in range(0, self.num_inj.get()):
 
-            #if change_fault_param == self.VarSel.inj_time.value:
-
             if (self.rand_var.get()) or (change_fault_param == self.VarSel.inj_time.value):
                 param_time = self.generate_param_value(self.fault_ranges['time'],
                                                        random_on=self.rand_var.get(),
@@ -116,9 +114,6 @@ class FaultInjectionStats:
             else:
                 param_time = self.fault_ranges['time'].min.get()
 
-            #if param_time is None: break
-
-            #if change_fault_param == self.VarSel.addr.value:
             if (self.rand_var.get()) or (change_fault_param == self.VarSel.addr.value):
                 param_addr = self.generate_param_value(self.fault_ranges['mem'],
                                                        random_on=self.rand_var.get(),
@@ -126,10 +121,6 @@ class FaultInjectionStats:
             else:
                 param_addr = self.fault_ranges['mem'].min.get()
 
-            #if param_addr is None: break
-
-            #if change_fault_param == self.VarSel.bit_pos.value:
-                #param_bit = delta
             if (self.rand_var.get()) or (change_fault_param == self.VarSel.bit_pos.value):
                 param_bit = self.generate_param_value(bit_range,
                                                       random_on=self.rand_var.get(),
@@ -143,8 +134,6 @@ class FaultInjectionStats:
             config_f.write("\n")
             config_f.write(str(param_time) + " " + str(param_addr) + " ")
             config_f.write(str(param_bit))
-
-            #if (param_bit == 7) and (change_fault_param == self.VarSel.bit_pos.value): break
 
             delta += 1
 
