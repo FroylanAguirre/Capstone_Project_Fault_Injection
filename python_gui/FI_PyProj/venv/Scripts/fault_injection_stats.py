@@ -38,6 +38,8 @@ class FaultInjectionStats:
         self.var_val_sel = self.VarSel.addr.value #enum VarSel, selects variable quantity
         self.test_number = 0
         self.bit_pos = None #, selects a constant bit position [0, 7]
+        self.hex_val = None
+        self.dec_val = None
 
     def create_sample_list(self):
         pass
@@ -185,6 +187,7 @@ class FaultInjectionStats:
         self.bit_pos_radiobutton(fiFrame)
 
         self.breakpoint_timeout_subframe(fiFrame)
+        self.hex_to_dec_subframe(fiFrame)
         self.fault_range_subframe(fiFrame)
 
         self.general_options_subframe(fiFrame)
@@ -288,6 +291,9 @@ class FaultInjectionStats:
 
         self.var_val_sel.set(self.VarSel.addr.value)
 
+
+
+
     def general_options_subframe(self, master):
         op_frame = LabelFrame(master, text="General Options")
         #op_frame.pack(ipadx=5)
@@ -330,6 +336,50 @@ class FaultInjectionStats:
         self.project_name = StringVar()
         entry1 = Entry(proj_name, textvariable=self.project_name)
         entry1.pack()
+
+    def hex_to_dec_subframe(self, master):
+
+        self.hex_val = StringVar()
+        self.dec_val = StringVar()
+
+        self.hex_val.set("jesus")
+        self.dec_val.set("christ")
+
+        htd_frame = LabelFrame(master, text="Hex-to-Decimal")
+        htd_frame.grid(row=4, column=0)
+
+        hex_label = Label(htd_frame, text="Hex")
+        hex_label.grid(column=0, row=0)
+        dec_label = Label(htd_frame, text="Dec")
+        dec_label.grid(column=1, row=0)
+
+        hex_entry = Entry(htd_frame, text="Hex Value", textvariable=self.hex_val)
+        hex_entry.grid(column=0, row=1, padx=10, pady=5)
+
+        dec_entry = Entry(htd_frame, text="Decimal Value", textvariable=self.dec_val)
+        dec_entry.grid(column=1, row=1, padx=10, pady=5)
+
+        to_hex_btn = Button(htd_frame,
+                                    text="Convert to Hex",
+                                    takefocus=0,
+                                    command=self.dec_to_hex,
+                                    pady=3)
+
+        to_hex_btn.grid(column=1, row=2)
+        to_dec_btn = Button(htd_frame,
+                            text="Convert to Dec",
+                            takefocus=0,
+                            command=self.hex_to_dec,
+                            pady=3)
+
+        to_dec_btn.grid(column=0, row=2)
+
+    def dec_to_hex(self):
+        dec = int(self.dec_val.get())
+        self.hex_val.set(hex(dec))
+
+    def hex_to_dec(self):
+        self.dec_val.set(int(self.hex_val.get(), 16))
 
     def breakpoint_timeout_subframe(self, master):
         bt_frame = LabelFrame(master,
