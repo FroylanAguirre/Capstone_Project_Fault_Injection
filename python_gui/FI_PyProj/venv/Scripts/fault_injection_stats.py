@@ -342,8 +342,6 @@ class FaultInjectionStats:
         self.hex_val = StringVar()
         self.dec_val = StringVar()
 
-        self.hex_val.set("jesus")
-        self.dec_val.set("christ")
 
         htd_frame = LabelFrame(master, text="Hex-to-Decimal")
         htd_frame.grid(row=4, column=0)
