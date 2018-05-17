@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 from enum import Enum
+from fault_injection_stats import StringVar
 import re
 
 MAX_STACK_ADDR = 0x20030000
@@ -12,81 +13,13 @@ LOS_SUBIDX = 5
 
 NUM_REGS = 17
 
-class CpuRegs:
-
-    def r0(self):
-        return 0
-
-    def r1(self):
-        return 1
-
-    def r2(self):
-        return 2
-
-    def r3(self):
-        return 3
-
-    def r4(self):
-        return 4
-
-    def r5(self):
-        return 5
-
-    def r6(self):
-        return 6
-
-    def r7(self):
-        return 7
-
-    def r8(self):
-        return 8
-
-    def r9(self):
-        return 9
-
-    def r10(self):
-        return 10
-
-    def r11(self):
-        return 11
-
-    def r12(self):
-        return 12
-
-    def sp(self):
-        return 13
-
-    def lr(self):
-        return 14
-
-    def pc(self):
-        return 15
-
-    def xPSR(self):
-        return 16
-
-    # r0 = 0
-    # r1 = 1
-    # r2 = 2
-    # r3 = 3
-    # r4 = 4
-    # r5 = 5
-    # r6 = 6
-    # r7 = 7
-    # r8 = 8
-    # r9 = 9
-    # r10 = 10
-    # r11 = 11
-    # r12 = 12
-    # sp = 13
-    # lr = 14
-    # pc = 15
-    # xPSR = 16
-
 class SampleParser:
+
     def __init__(self):
         self.sample_file = None
 
+    def parse_sample_file(self, sample_file):
+        self.sample_file = sample_file
 
 
     def get_reg_list(self, sample):
@@ -151,6 +84,42 @@ class SampleParser:
         for idx in range(0, len(val_listA)): # assuming lists are of same length
             if val_listA[idx] != val_listB[idx]:
                 addrCount[idx] = addrCount[idx] + 1
-            
+
         return addrCount
+
+class CpuRegs:
+    def r0(self):
+        return 0
+    def r1(self):
+        return 1
+    def r2(self):
+        return 2
+    def r3(self):
+        return 3
+    def r4(self):
+        return 4
+    def r5(self):
+        return 5
+    def r6(self):
+        return 6
+    def r7(self):
+        return 7
+    def r8(self):
+        return 8
+    def r9(self):
+        return 9
+    def r10(self):
+        return 10
+    def r11(self):
+        return 11
+    def r12(self):
+        return 12
+    def sp(self):
+        return 13
+    def lr(self):
+        return 14
+    def pc(self):
+        return 15
+    def xPSR(self):
+        return 16
 

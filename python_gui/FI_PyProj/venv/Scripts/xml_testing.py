@@ -64,15 +64,9 @@ try:
     errs_b = []
 
     for i in range(len(heap_err)):
-        if seq_loss_errs[i] > 0:
-            errs_b.append(heap_err[i][0][0])
-            addrs_b.append(heap_err[i][1])
-            tims_b.append(heap_err[i][2])
-        else:
-            errs_a.append(heap_err[i][0][0])
-            addrs_a.append(heap_err[i][1])
-            tims_a.append(heap_err[i][2])
-            
+        errs.append(heap_err[i][0][0])
+        addrs.append(heap_err[i][1])
+        tims.append(heap_err[i][2])
 
     # for val in heap_err:
     #     print val

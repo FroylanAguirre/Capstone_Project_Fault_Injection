@@ -4,10 +4,11 @@ matplotlib.use("TkAgg")
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.backends.backend_tkagg as tkagg
+from mpl_toolkits import mplot3d
 from tkinter import filedialog
 import os
 import xml.etree.ElementTree as ET
-import sample_parser as spl
+from SampleParser import SampleParser
 
 class ProjectAnalysisPage:
 
@@ -84,14 +85,25 @@ class ProjectAnalysisPage:
 
 
     def print_plots(self):
-        regs = spl.CpuRegs()
-        p = spl.SampleParser()
+        print("yess")
+        p = SampleParser()
+
+        print("sample_file.get(): ", self.sample_file.get())
+        file = self.sample_file.get()
+        plot_list = p.parse_sample_file(file)
+        print("plot_list: ", plot_list)
+        print("lkjsadflkj")
+
+        if len(plot_list[0]) > 0 :
+            self.f.delaxes(self.a)
+            self.a = self.f.gca(projection='3d')
+            self.a.plot_trisurf(plot_list[0], plot_list[1], plot_list[2], cmap='viridis', edgecolor='none')
 
 
 
-        self.f.delaxes(self.a)
-        self.a = self.f.add_subplot(111)
-        self.a.plot([1, 4, 2, 34, 5, 9, 4, 11], [33, 32, 7, 3, 4, 9, 7, 5])
-        self.canvas.show()
-        self.canvas.get_tk_widget().pack(side=BOTTOM, fill=BOTH, expand=True)
+            # self.f.delaxes(self.a)
+            # self.a = self.f.add_subplot(111)
+            # self.a.plot([1, 4, 2, 34, 5, 9, 4, 11], [33, 32, 7, 3, 4, 9, 7, 5])
+            self.canvas.show()
+            self.canvas.get_tk_widget().pack(side=BOTTOM, fill=BOTH, expand=True)
 
