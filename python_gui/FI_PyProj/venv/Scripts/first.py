@@ -12,10 +12,12 @@ import socket
 from tcl_port_coms import Tcl_Port
 from fault_injection_stats import FaultInjectionStats
 from ProjectAnalysis import ProjectAnalysisPage
+import HeapVariables
 
 """
 Top level logic.
 Reminder that we are using version 8.6 of Tkinter.
+This file should be in the long path on the GitHub.
 """
 
 MAIN_O_FILE_TOKEN = "Src/main.o"
@@ -31,54 +33,54 @@ def check_list_intersection(listA, listB):
 
     return nonzero_intersection
 
-def readPrintOutputMap(filePath):
-    print("Reading and Printing the output.map file")
-
-    lineList = []
-    mapfile = open(filePath, "r")
-
-    if (mapfile.mode != 'r'):
-        print("File not properly opened.")
-        quit()
-
-    prevLine = ""
-    line = " "
-    tokenlist = []
-    mainStr = 'Src/main.o'
-    flag = False
-
-    while (line != ""):
-        line = mapfile.readline()
-
-        if (len(line) == 0):
-            break
-
-        tokenlist = line.split()
-
-        if (len(tokenlist) == 0):
-            continue
-
-        if (re.search("Src/\w+[.]o", tokenlist[-1])):
-            prevLine = line
-            flag = True
-            continue
-
-        if (flag):
-            if (tokenlist[0].startswith("0x2")): #only SRAM locations for now
-                if (prevLine != None):
-                    lineList.append(prevLine)
-                    prevLine = None
-
-                lineList.append(line)
-            else:
-                flag = False
-
-    mapfile.close()
-
-    if (len(lineList) == 0):
-        lineList.append("No global variables found.")
-
-    return lineList
+# def readPrintOutputMap(filePath):
+#     print("Reading and Printing the output.map file")
+#
+#     lineList = []
+#     mapfile = open(filePath, "r")
+#
+#     if (mapfile.mode != 'r'):
+#         print("File not properly opened.")
+#         quit()
+#
+#     prevLine = ""
+#     line = " "
+#     tokenlist = []
+#     mainStr = 'Src/main.o'
+#     flag = False
+#
+#     while (line != ""):
+#         line = mapfile.readline()
+#
+#         if (len(line) == 0):
+#             break
+#
+#         tokenlist = line.split()
+#
+#         if (len(tokenlist) == 0):
+#             continue
+#
+#         if (re.search("Src/\w+[.]o", tokenlist[-1])):
+#             prevLine = line
+#             flag = True
+#             continue
+#
+#         if (flag):
+#             if (tokenlist[0].startswith("0x2")): #only SRAM locations for now
+#                 if (prevLine != None):
+#                     lineList.append(prevLine)
+#                     prevLine = None
+#
+#                 lineList.append(line)
+#             else:
+#                 flag = False
+#
+#     mapfile.close()
+#
+#     if (len(lineList) == 0):
+#         lineList.append("No global variables found.")
+#
+#     return lineList
 
 def findGlobalVars():
     print("Finding global vars in C file.")
@@ -136,10 +138,15 @@ def updateProjMemStats():
     if (not proj.isValidProj):
         return None
 
-    toPrint = readPrintOutputMap(os.path.join(proj.projPath, "Debug/output.map"))
+    # parser = HeapVariables.HeapVariables()
+    # parser.set_output_map_path(os.path.join(proj.projPath, "Debug/output.map"))
+    # parser.update_heap_var_data()
+    #toPrint = readPrintOutputMap(os.path.join(proj.projPath, "Debug/output.map"))
+    proj.heap_vars.update_heap_var_data()
     toStackText = parseStackData()
     gui.tab1.stackTable.populateTable(toStackText)
-    gui.tab1.glblVars.displayGlobalVars(toPrint)
+    gui.tab1.glblVars.displayGlobalVars(proj.heap_vars.__repr__()) # toPrint)
+    gui.memmap.update_memory_table(proj.heap_vars)
 
 def projSelButtonPress():
     print("BUTTON PRESSED")
@@ -152,7 +159,8 @@ def projSelButtonPress():
         #print("directories: %s" % directories)
 
         proj.isValidProj = True
-        proj.projPath = name
+        # proj.projPath = name
+        proj.set_project_path(name)
 
         gui.tab1.proj_dir.updateFileLabel(name)
         updateProjMemStats()

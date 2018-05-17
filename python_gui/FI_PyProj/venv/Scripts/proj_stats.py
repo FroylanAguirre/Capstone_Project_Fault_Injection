@@ -4,6 +4,7 @@ import os
 from tkinter import Frame
 import re
 from tkinter import filedialog
+from HeapVariables import HeapVariables
 from gui_format import Gui_format
 from fault_injection_stats import FaultInjectionStats
 # from gui_format import DirSettings
@@ -15,12 +16,17 @@ REQ_PROJECT_DIR_LIST = (".settings", "Debug",
 class Proj_Stats:
 
     def __init__(self):
-        self.projPath = ""
+        self.projPath = "" # path to top project dir (top dir on Project View in Eclipse)
         #self.projPath.trace("w",self.isValidProject())
-        self.isValidProj = False
+        self.isValidProj = False # true if projPath is a valid path
         self.config_sampling_dir = None
         self.sample_dir = None
         self.openocdExe_dir = None
+        self.heap_vars = HeapVariables() # a list of heap variables and their info
+
+    def set_project_path(self, dir_path):
+        self.projPath = dir_path
+        self.heap_vars.set_output_map_path(os.path.join(self.projPath, "Debug/output.map"))
 
     @property
     def check_ready_for_config_creation(self):

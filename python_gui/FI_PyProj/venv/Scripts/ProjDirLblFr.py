@@ -50,8 +50,8 @@ class GlobalVarsDisplayLblFr(LabelFrame):
         self.globalText.config(state=NORMAL)
         self.globalText.delete('1.0', END)
 
-        for line in newtext:
-            self.globalText.insert(END, line)
+        #for line in newtext:
+        self.globalText.insert(END, newtext)
 
         self.globalText.config(state=DISABLED)
 

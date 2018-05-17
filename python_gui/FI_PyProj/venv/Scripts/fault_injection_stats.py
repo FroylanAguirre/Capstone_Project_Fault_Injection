@@ -166,7 +166,7 @@ class FaultInjectionStats:
     def rand_addr_value(self, from1, to1 , from2, to2):
         #check if only one addr range is specified
         if from2 == to2:
-            return randint(from1, to1)
+            return random.randint(from1, to1)
         #check if addr ranges are in order
         elif from1 < from2:
             while(True): 

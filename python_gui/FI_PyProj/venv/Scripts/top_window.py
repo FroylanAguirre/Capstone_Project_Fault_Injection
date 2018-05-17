@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import ttk
 from gui_format import *
 from proj_stats import *
+from mem_map_canvas import MemoryMapCanvas
 
 class Top_Frame(Frame):
 
@@ -31,6 +32,11 @@ class Top_Frame(Frame):
 
         tab5 = proj_analysis.create_gui(master)
         tabber.add(tab5, text="Failure Analysis")
+
+        tab6 = Frame(master)
+        tab6.pack(fill="none")
+        self.memmap = MemoryMapCanvas(tab6)
+        tabber.add(tab6, text="Sampling Settings")
 
         # self.tab3 = Graph_Tab(self)
         # tabber.add(self.tab3, text="Graphs")
