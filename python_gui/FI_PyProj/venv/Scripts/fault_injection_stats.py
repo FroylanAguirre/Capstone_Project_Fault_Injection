@@ -25,21 +25,22 @@ class FaultInjectionStats:
 
     def __init__(self, proj_info):
         self.project = proj_info
-        self.bp_list = {'init':None, 'inj':None, 'smpl':None} # dict of IntVal()
-        self.to_list = {'init':None, 'inj':None, 'smpl':None} # dict of IntVal()
-        self.project_name = None # StringVar()
-        self.fault_ranges = {'time':FaultParam(),
+        self.bp_list = {'init': None, 'inj': None, 'smpl': None}  # dict of IntVal()
+        self.to_list = {'init': None, 'inj': None, 'smpl': None}  # dict of IntVal()
+        self.project_name = None  # StringVar()
+        self.fault_ranges = {'time': FaultParam(),
                              'mem1': FaultParam(),
                              'mem2': FaultParam(),
-                             'reg':FaultParam()} # dict of IntVal
-        self.num_inj = 666 # dict of IntVal
-        self.inj_area = {'mem':None, 'reg':None} # dict of IntVar
-        self.rand_var = None # dict of IntVal, selects if variable varies randomly
-        self.var_val_sel = self.VarSel.addr.value #enum VarSel, selects variable quantity
+                             'reg': FaultParam()}  # dict of IntVal
+        self.num_inj = 666  # dict of IntVal
+        self.inj_area = {'mem': None, 'reg': None}  # dict of IntVar
+        self.rand_var = None  # dict of IntVal, selects if variable varies randomly
+        self.var_val_sel = self.VarSel.addr.value  # enum VarSel, selects variable quantity
         self.test_number = 0
-        self.bit_pos = None #, selects a constant bit position [0, 7]
+        self.bit_pos = None  # , selects a constant bit position [0, 7]
         self.hex_val = None
         self.dec_val = None
+        self.sample_file = None
 
     def create_sample_list(self):
         pass
@@ -189,6 +190,7 @@ class FaultInjectionStats:
         self.breakpoint_timeout_subframe(fiFrame)
         self.hex_to_dec_subframe(fiFrame)
         self.fault_range_subframe(fiFrame)
+        self.analysis_plots_subframe(fiFrame)
 
         self.general_options_subframe(fiFrame)
         self.variable_quantity_subframe(fiFrame)
@@ -336,6 +338,19 @@ class FaultInjectionStats:
         self.project_name = StringVar()
         entry1 = Entry(proj_name, textvariable=self.project_name)
         entry1.pack()
+
+    def analysis_plots_subframe(self, master):
+        self.sample_file = StringVar()
+        self.sample_file.set(self.project.sample_dir.get())
+
+        plots_frame = LabelFrame(master, text="Analysis Plots")
+        plots_frame.grid(row=4, column=1)
+
+        sample_file_label = Label(plots_frame, text="Sample File")
+        sample_file_label.grid(row=0, column=0)
+        sample_file_entry = Entry(plots_frame, textvariable=self.sample_file)
+        sample_file_entry.grid(row=0, column=1)
+
 
     def hex_to_dec_subframe(self, master):
 

@@ -5,7 +5,7 @@ from proj_stats import *
 
 class Top_Frame(Frame):
 
-    def __init__(self, master, tclPortObj, projectInfo, fi_info):
+    def __init__(self, master, tclPortObj, projectInfo, fi_info, proj_analysis):
 
         Frame.__init__(self, master)
         self.pack(fill="both")
@@ -28,6 +28,9 @@ class Top_Frame(Frame):
 
         tab4 = fi_info.create_gui(master)
         tabber.add(tab4, text="Fault Injection")
+
+        tab5 = proj_analysis.create_gui(master)
+        tabber.add(tab5, text="Failure Analysis")
 
         # self.tab3 = Graph_Tab(self)
         # tabber.add(self.tab3, text="Graphs")

@@ -11,6 +11,7 @@ import matplotlib
 import socket
 from tcl_port_coms import Tcl_Port
 from fault_injection_stats import FaultInjectionStats
+from ProjectAnalysis import ProjectAnalysisPage
 
 """
 Top level logic.
@@ -177,6 +178,7 @@ toPrint = ""
 
 proj = Proj_Stats()
 fi = FaultInjectionStats(proj)
+analysis = ProjectAnalysisPage(proj)
 
 #matplotlib.use("TkAgg")
 root = Tk()
@@ -185,38 +187,10 @@ root.title("Memory Stats")
 
 tcl_port = Tcl_Port()
 
-gui = Top_Frame(root, tcl_port, proj, fi)
+gui = Top_Frame(root, tcl_port, proj, fi, analysis)
 
 #Set button actions.
 gui.tab1.dirConfig.projDirButton.configure(command=projSelButtonPress)
 gui.tab1.dirConfig.redoButton.configure(command=redoButtonPress)
-
-
-
-# root.tk.eval('puts "hello, pls work"')
-# root.tk.eval('source tcl_script.tcl')
-# root.tk.eval('puts "DONE"')
-
-# TCP_IP = '127.0.0.1'
-# TCP_PORT = 6666
-# BUFFER_SIZE = 1024
-# MESSAGE = "Hello, World!"
-#
-# host = socket.gethostname()
-# print("host: ", host)
-# s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# conState = s.connect_ex(('localhost', TCP_PORT))
-# print("conState: ", conState)
-#
-# sendState = s.sendall(b"echo Hello_there")
-# print("sendState: ", sendState)
-# sendState = s.sendall(b"reset run")
-# print("sendState: ", sendState)
-#
-# data = "Nothing received."
-# #data = s.recv(BUFFER_SIZE)
-#
-# s.close()
-# print("received data:", data)
 
 gui.mainloop()

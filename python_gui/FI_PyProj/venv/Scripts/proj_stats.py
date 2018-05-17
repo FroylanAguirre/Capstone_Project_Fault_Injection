@@ -12,7 +12,6 @@ REQ_PROJECT_DIR_LIST = (".settings", "Debug",
                         "Drivers", "Inc",
                         "Src", "startup")
 
-
 class Proj_Stats:
 
     def __init__(self):
