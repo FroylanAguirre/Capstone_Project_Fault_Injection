@@ -147,3 +147,6 @@ class HeapVarInfo:
         string_repr = self.name + " is " + str(self.size) + " bytes at "
         string_repr += format(self.addr, '#010x')
         return string_repr
+
+    def __eq__(self, other):
+        return self.name == other.name
