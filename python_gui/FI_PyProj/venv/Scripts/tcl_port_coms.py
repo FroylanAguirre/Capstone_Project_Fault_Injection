@@ -5,6 +5,7 @@ TCP_PORT = 6666
 class Tcl_Port:
 
     def tclPortConnect(self):
+        # add subprocess here
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         conState = self.sock.connect_ex(('localhost', TCP_PORT))
 
@@ -26,12 +27,19 @@ class Tcl_Port:
                 self.isConnected = False
                 return "Port closed."
 
-            recData = None
+            recData = ""
+            singleByte = "p"
             if (cmdLength == sentBytes):
-                recData = self.sock.recv(20) #change this later
+                # recData = self.sock.recv(20) #change this later
+                while ord(singleByte) != 0x1A:
+                    singleByte = self.sock.recv(1)
+                    recData += singleByte.decode("utf-8")
+                    if singleByte == "":
+                        recData = "Connection closed."
             else:
                 self.isConnected = False
 
+            recData = recData[0:-1] # removes the termination char
             return recData
 
     def sendCmd(self, event):

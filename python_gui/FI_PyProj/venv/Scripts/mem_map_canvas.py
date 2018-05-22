@@ -19,6 +19,7 @@ class MemoryMapCanvas(Canvas):
     '''
     Canvas subclass that draws out a memory map using canvas widgets (lines,
     rectangles, circles, etc)
+    Part of a collection of widgets used to create the memory map Frame subclass.
     '''
 
     def __init__(self, master):
@@ -114,9 +115,6 @@ class MemoryMapCanvas(Canvas):
                              MAIN_REC_X + MAIN_REC_WIDTH,
                              y_pos,
                              dash=(2,10))
-
-            chk = Checkbutton(self.master)
-            chk.pack()
 
             # draw size lines
             self.create_line(MAIN_REC_X + SIZE_LINES_X_OFFSET,

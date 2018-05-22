@@ -24,8 +24,8 @@ class Top_Frame(Frame):
         #self.tab2 = Graph_Tab()
         #tabber.add(self.tab2, text="Empty Tab")
 
-        # self.tab2 = tclPortObj.create_gui(master)
-        # tabber.add(self.tab2, text='Tcl Terminal')
+        self.tab2 = tclPortObj.create_gui(master)
+        tabber.add(self.tab2, text='Tcl Terminal')
 
         tab4 = fi_info.create_gui(master)
         tabber.add(tab4, text="Fault Injection")
