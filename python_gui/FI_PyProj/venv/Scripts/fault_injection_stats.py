@@ -7,6 +7,7 @@ from tkinter import *
 # from tkinter import StringVar
 # from tkinter import Checkbutton
 # from tkinter import Button
+from tkinter import filedialog
 from tkinter import _tkerror
 from tkinter import Radiobutton
 from tkinter import messagebox
@@ -41,6 +42,7 @@ class FaultInjectionStats:
         self.hex_val = None
         self.dec_val = None
         self.sample_file = None
+        self.config_file_path = None
 
     def create_sample_list(self):
         pass
@@ -99,17 +101,25 @@ class FaultInjectionStats:
         self.project_name.set(p_name)
 
     def write_config_file(self, config_f):
+
+        #write the projcet directories
+        config_f.write(self.project.sample_dir.get() + '\n')
+        config_f.write(self.project.config_sampling_dir.get() + '\n')
+        config_f.write(self.project.openocdExe_dir.get() + '\n')
+
+        #write the name of the file to write samples to
         samples_filename = self.project.sample_dir.get() + "/"
-        samples_filename += "samples.txt"
+        samples_filename += "samples.txt\n"
         config_f.write(samples_filename)
 
+        #write the time-out list values
         config_f.write(str(self.to_list['init'].get()) + ' ')
         config_f.write(str(self.to_list['inj'].get()) + ' ')
         config_f.write(str(self.to_list['smpl'].get()) + '\n')
 
         config_f.write(hex(self.bp_list['init'].get()) + ' ')
         config_f.write(hex(self.bp_list['inj'].get()) + ' ')
-        config_f.write(hex(self.bp_list['smpl'].get()))
+        config_f.write(hex(self.bp_list['smpl'].get()) + ' ')
 
         # delta = {'time':0,
         #          'mem':0,
@@ -117,6 +127,19 @@ class FaultInjectionStats:
         delta = 0 # only used for non-random, varying fault parameters
  
         change_fault_param = self.var_val_sel.get()
+
+        #write the fault injection ranges
+        config_f.write("\ninjection_count: ")
+        config_f.write(str(self.num_inj.get()) + ' ')
+        config_f.write("\ntimes: ")
+        config_f.write(str(self.fault_ranges['time'].min.get()) + ' ')
+        config_f.write(str(self.fault_ranges['time'].max.get()) + ' ')
+        config_f.write("\nmem_range1: ")
+        config_f.write(str(self.fault_ranges['mem1'].max.get()) + ' ')
+        config_f.write(str(self.fault_ranges['mem1'].max.get()) + ' ')
+        config_f.write("\nmem_range2: ")
+        config_f.write(str(self.fault_ranges['mem2'].max.get()) + ' ')
+        config_f.write(str(self.fault_ranges['mem2'].max.get()) + ' ')
 
         # break_flag = False
         for n in range(self.num_inj.get()):
@@ -145,6 +168,66 @@ class FaultInjectionStats:
             # if (param_bit == 7) and (change_fault_param == self.VarSel.bit_pos.value): break
 
             delta += 1
+
+    def load_config_file(self):
+        self.config_file_path = StringVar()
+        file_path = filedialog.askopenfilename(initialdir = self.project.config_sampling_dir.get(),title = "Select file")
+
+        if file_path:
+            self.config_file_path.set(file_path)
+
+        ld_file = open(file_path, 'r')
+
+        line = ld_file.readline()
+        print("line0: ", line)
+        self.project.sample_dir.set(line)
+
+        line = ld_file.readline()
+        print("line1: ", line)
+        self.project.config_sampling_dir.set(line)
+
+        line = ld_file.readline()
+        print("line2: ", line)
+        self.project.openocdExe_dir.set(line)
+
+        line = ld_file.readline()
+        print("line2.5: ", line)
+
+        line = ld_file.readline().split()
+        print("line3: ", line)
+        self.to_list['init'].set(int(line[0]))
+        self.to_list['inj'].set(int(line[1]))
+        self.to_list['smpl'].set(int(line[2]))
+
+        line = ld_file.readline().split()
+        print("line4: ", line)
+        try:
+            self.bp_list['init'].set(int(line[0]))
+            self.bp_list['inj'].set(int(line[1]))
+            self.bp_list['smpl'].set(int(line[2]))
+        except ValueError:
+            self.bp_list['init'].set(int(line[0], 16))
+            self.bp_list['inj'].set(int(line[1], 16))
+            self.bp_list['smpl'].set(int(line[2], 16))
+
+        line = ld_file.readline().split()
+        print("line5: ", line)
+        self.num_inj = int(line[1])
+
+        line = ld_file.readline().split()
+        print("line6: ", line)
+        self.fault_ranges['time'].min.set(int(line[1]))
+        self.fault_ranges['time'].max.set(int(line[2]))
+
+        line = ld_file.readline().split()
+        print("line7: ", line)
+        self.fault_ranges['mem1'].min.set(int(line[1]))
+        self.fault_ranges['mem1'].max.set(int(line[2]))
+
+        line = ld_file.readline().split()
+        print("line8: ", line)
+        self.fault_ranges['mem2'].min.set(int(line[1]))
+        self.fault_ranges['mem2'].max.set(int(line[2]))
 
 
     def generate_param_value(self, fault_param, random_on=True, delta=0):
@@ -190,7 +273,7 @@ class FaultInjectionStats:
         self.breakpoint_timeout_subframe(fiFrame)
         self.hex_to_dec_subframe(fiFrame)
         self.fault_range_subframe(fiFrame)
-        self.analysis_plots_subframe(fiFrame)
+        # self.analysis_plots_subframe(fiFrame)
 
         self.general_options_subframe(fiFrame)
         self.variable_quantity_subframe(fiFrame)
@@ -201,8 +284,12 @@ class FaultInjectionStats:
                                     text="Create Config File",
                                     takefocus=0,
                                     command=self.create_config_file)
-        #create_config_bttn.pack()
         create_config_bttn.grid(row=3, column=1)
+        load_config_bttn = Button(fiFrame,
+                                  text="Load Existing Configuration",
+                                  takefocus=0,
+                                  command=self.load_config_file)
+        load_config_bttn.grid(row=4, column=1)
 
         return fiFrame
 
