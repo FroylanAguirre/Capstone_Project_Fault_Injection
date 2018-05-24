@@ -113,6 +113,10 @@ class Tcl_Interface_Tab(Frame):
                                 text="Tcl Port Connect",
                                 takefocus=0)
         self.tclPortConnect.pack()
+        self.tclGetRuntime = Button(buttonEntryFrame,
+                                    text="get runtim",
+                                    takefocus=0)
+        self.tclGetRuntime.pack()
 
         self.tclInput = Entry(buttonEntryFrame)
         #self.tclInput.bind("<Return>", self.exec_tcl_cmd)
