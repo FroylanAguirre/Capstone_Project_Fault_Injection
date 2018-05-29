@@ -143,8 +143,8 @@ def updateProjMemStats():
     # parser.update_heap_var_data()
     #toPrint = readPrintOutputMap(os.path.join(proj.projPath, "Debug/output.map"))
     proj.heap_vars.update_heap_var_data()
-    # toStackText = parseStackData()
-    # gui.tab1.stackTable.populateTable(toStackText)
+    toStackText = parseStackData()
+    gui.tab1.stackTable.populateTable(toStackText)
     gui.tab1.glblVars.displayGlobalVars(proj.heap_vars.__repr__()) # toPrint)
     gui.memmap.update_memory_table(proj.heap_vars)
 
