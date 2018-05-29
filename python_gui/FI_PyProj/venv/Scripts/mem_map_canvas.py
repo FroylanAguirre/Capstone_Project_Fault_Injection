@@ -5,7 +5,7 @@ from tkinter import Checkbutton
 CANVAS_HEIGHT = 600
 MAIN_REC_WIDTH = 150
 MAIN_REC_HEIGHT = 300
-MAIN_REC_X = 50
+MAIN_REC_X = 75
 MAIN_REC_Y = 25
 TEXT_HEIGHT = 20
 VAR_NAME_WIDTH = 110
@@ -14,6 +14,11 @@ SIZE_LINES_X_OFFSET = -10
 SIZE_LINES_TICK_WIDTH = 10
 SIZE_LINES_TEXT_OFFSET = -25
 SELECTION_COLOR = "blue"
+DISTANCE_BTW_CHECKBOXES = 60
+FIRST_CHECKBOX_X = MAIN_REC_X + MAIN_REC_WIDTH + 30
+HALF_DIAGONAL_LENGTH = 8
+
+# this file should have the checkboxes
 
 class MemoryMapCanvas(Canvas):
     '''
@@ -37,8 +42,6 @@ class MemoryMapCanvas(Canvas):
                          text="SystemCoreClock",
                          fill="#000000",
                          font=("Consolas", 10))
-
-        self.selected_tags = []
 
         self.pack(fill="none")
 
@@ -102,11 +105,6 @@ class MemoryMapCanvas(Canvas):
                              anchor="e",
                              tag=glbl.name + "_line_size")
 
-            # binds clicking on text with specific action
-            self.tag_bind(glbl.name,
-                          "<ButtonPress-1>",
-                          (lambda ev: self.selection_click(ev)))
-
             y_pos += pixel_var_size
 
             # draw line between variables
@@ -133,23 +131,117 @@ class MemoryMapCanvas(Canvas):
                              y_pos - 1,
                              tag=glbl.name + "_line_size")
 
+            # draw check boxes
+            self.create_rectangle(FIRST_CHECKBOX_X - HALF_DIAGONAL_LENGTH,
+                                  y_pos - (pixel_var_size/2) - HALF_DIAGONAL_LENGTH,
+                                  FIRST_CHECKBOX_X + HALF_DIAGONAL_LENGTH,
+                                  y_pos - (pixel_var_size/2) + HALF_DIAGONAL_LENGTH,
+                                  fill='',
+                                  activefill="gray",
+                                  outline='black',
+                                  tag=glbl.name + "_sample")
+            self.create_rectangle(FIRST_CHECKBOX_X + DISTANCE_BTW_CHECKBOXES - HALF_DIAGONAL_LENGTH,
+                                  y_pos - (pixel_var_size/2) - HALF_DIAGONAL_LENGTH,
+                                  FIRST_CHECKBOX_X + DISTANCE_BTW_CHECKBOXES + HALF_DIAGONAL_LENGTH,
+                                  y_pos - (pixel_var_size/2) + HALF_DIAGONAL_LENGTH,
+                                  fill='',
+                                  activefill="gray",
+                                  outline='black',
+                                  tag=glbl.name + "_critical")
+            # bind click event to sampling checkbox
+            self.tag_bind(glbl.name + "_sample",
+                          "<ButtonPress-1>",
+                          (lambda ev: self.sample_click(ev)))
 
-    def selection_click(self, event):
+            # bind click event to critical checkbox
+            self.tag_bind(glbl.name + "_critical",
+                          "<ButtonPress-1>",
+                          (lambda ev: self.critical_click(ev)))
+
+        self.create_text(FIRST_CHECKBOX_X,
+                         y_pos,
+                         font=("Consolas", 9),
+                         text="Sample",
+                         anchor="n")
+        self.create_text(FIRST_CHECKBOX_X + DISTANCE_BTW_CHECKBOXES,
+                         y_pos,
+                         font=("Consolas", 9),
+                         text="Crit.",
+                         anchor="n")
+
+        self.create_text(MAIN_REC_X + SIZE_LINES_TEXT_OFFSET,
+                         y_pos,
+                         font=("Consolas", 9),
+                         text="size\n(bytes)",
+                         anchor="n")
+
+        self.create_line(FIRST_CHECKBOX_X + DISTANCE_BTW_CHECKBOXES/2,
+                         MAIN_REC_Y,
+                         FIRST_CHECKBOX_X + DISTANCE_BTW_CHECKBOXES/2,
+                         y_pos,
+                         width=5,
+                         capstyle="round")
+
+    def sample_click(self, event):
+        '''
+        Called when a sample checkbox is clicked on.
+        '''
         widget_id = event.widget.find_closest(event.x, event.y)
         tag_str = self.itemcget(widget_id, "tag")  # returns (widget tag) and "current" separated by a space
         tag_str = tag_str.split()[0]
+        print("sample on: " + tag_str)
 
-        line_color = self.itemcget(tag_str + "_line_size", "fill")
-        if line_color == SELECTION_COLOR:
-            self.itemconfig(tag_str + "_line_size", fill="black")
+        fill_color = self.itemcget(tag_str, "fill")
+        if fill_color == SELECTION_COLOR:
+            self.itemconfig(tag_str, fill="")
+            tag_str = tag_str.replace("_sample", "_critical")
+            self.itemconfig(tag_str, fill="")
         else:
-            self.itemconfig(tag_str + "_line_size", fill=SELECTION_COLOR)
+            self.itemconfig(tag_str, fill=SELECTION_COLOR)
 
-        self.update_selected_tags(tag_str)
-
-    def update_selected_tags(self, widget_tag):
-        line_color = self.itemcget(widget_tag + "_line_size", "fill")  # returns (widget tag) and "current" separated by a space
-        if line_color == SELECTION_COLOR:
-            self.selected_tags.append(widget_tag)
+    def critical_click(self, event):
+        '''
+        Called when a sample checkbox is clicked on.
+        '''
+        widget_id = event.widget.find_closest(event.x, event.y)
+        tag_str = self.itemcget(widget_id, "tag")  # returns (widget tag) and "current" separated by a space
+        tag_str = tag_str.split()[0]
+        print("critical on: " + tag_str)
+        fill_color = self.itemcget(tag_str, "fill")
+        if fill_color == SELECTION_COLOR:
+            self.itemconfig(tag_str, fill="")
         else:
-            self.selected_tags.remove(widget_tag)
+            self.itemconfig(tag_str, fill=SELECTION_COLOR)
+
+        # also select sample since critical is ALWAYS sampled, but not the other way around
+        tag_str = tag_str.replace("_critical", "_sample")
+        self.itemconfig(tag_str, fill=SELECTION_COLOR)
+
+
+
+class SingleGlobalVar:
+    '''
+    Describes a global variable's possible sampling settings.
+    A sample true means that if an error is found, it counts as latent.
+    A critical true means that if an error is found, it counts as a data error.
+    '''
+
+    def __init__(self, name):
+        self.name = name
+        self.sample = False
+        self.critical = False
+
+    def set_critical(self):
+        self.critical = True
+        self.sample = True
+
+    def set_sample(self):
+        self.critical = False
+        self.sample = True
+
+    def clear_all(self):
+        self.critical = False
+        self.sample = False
+
+    def __eq__(self, other):
+        return self.name == other.name
