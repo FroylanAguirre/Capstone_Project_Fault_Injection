@@ -18,6 +18,7 @@ DISTANCE_BTW_CHECKBOXES = 60
 FIRST_CHECKBOX_X = MAIN_REC_X + MAIN_REC_WIDTH + 30
 HALF_DIAGONAL_LENGTH = 8
 
+# this file should have the checkboxes
 
 class MemoryMapCanvas(Canvas):
     '''
