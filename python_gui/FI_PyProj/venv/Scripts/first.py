@@ -146,7 +146,8 @@ def updateProjMemStats():
     # toStackText = parseStackData()
     # gui.tab1.stackTable.populateTable(toStackText)
     gui.tab1.glblVars.displayGlobalVars(proj.heap_vars.__repr__()) # toPrint)
-    gui.memmap.update_memory_table(proj.heap_vars)
+    fi.mem_map.update_memory_table(proj.heap_vars)
+    fi.update_proj_file_name(gui.tab1.proj_dir.pathname.get())
 
 def projSelButtonPress():
     print("BUTTON PRESSED")

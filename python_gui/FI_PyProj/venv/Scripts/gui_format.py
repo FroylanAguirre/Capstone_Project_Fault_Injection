@@ -3,7 +3,7 @@ from tkinter import filedialog
 from tkinter import *
 from tkinter import ttk
 import tkinter as tk
-from ProjDirLblFr import *
+from proj_dir_label_frame import *
 import matplotlib
 matplotlib.use("TkAgg")
 from matplotlib.figure import Figure

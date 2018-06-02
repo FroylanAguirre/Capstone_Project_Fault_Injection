@@ -17,26 +17,24 @@ class Top_Frame(Frame):
         tab3 = projectInfo.create_gui(master)
         tabber.add(tab3, text="Directory Settings")
 
-        #no masters specified since the line after takes care of that
+        # no masters specified since the line after takes care of that
         self.tab1 = Gui_format()
         tabber.add(self.tab1, text="ProjectInfo")
 
-        #self.tab2 = Graph_Tab()
-        #tabber.add(self.tab2, text="Empty Tab")
+        # self.tab2 = Graph_Tab()
+        # tabber.add(self.tab2, text="Empty Tab")
 
         self.tab2 = tclPortObj.create_gui(master)
         tabber.add(self.tab2, text='Tcl Terminal')
 
-        tab4 = fi_info.create_gui(master)
-        tabber.add(tab4, text="Fault Injection")
+        self.tab4 = fi_info.create_gui(master)
+        tabber.add(self.tab4, text="Fault Injection")
 
         tab5 = proj_analysis.create_gui(master)
         tabber.add(tab5, text="Failure Analysis")
 
-        tab6 = Frame(master)
-        tab6.pack(fill="none")
-        self.memmap = MemoryMapCanvas(tab6)
-        tabber.add(tab6, text="Sampling Settings")
+        # sample_frame = LabelFrame(tab4, text="Sampling Stuff")
+        # sample_frame.grid(row=0, column=1)
 
         # self.tab3 = Graph_Tab(self)
         # tabber.add(self.tab3, text="Graphs")

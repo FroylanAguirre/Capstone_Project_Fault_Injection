@@ -7,6 +7,7 @@ Contains Frame and LabelFrame subclasses that contain necessary widgets.
 They are arranged in the Gui_format class.
 """
 
+
 class ProjDirLblFr(LabelFrame):
 
     def __init__(self, master=None):
@@ -21,11 +22,11 @@ class ProjDirLblFr(LabelFrame):
         self.pathname = StringVar()
         self.pathname.set("No project file selected.")
 
-        pathLabel = Label(self, textvariable=self.pathname, anchor=W)
-        pathLabel.pack(fill="both")
+        path_label = Label(self, textvariable=self.pathname, anchor=W)
+        path_label.pack(fill="both")
 
     def updateFileLabel(self, path):
-        if (path != None):
+        if path is not None:
             self.pathname.set(path)
         else:
             self.pathname.set("Invalid project file selected.")
@@ -50,7 +51,6 @@ class GlobalVarsDisplayLblFr(LabelFrame):
         self.globalText.config(state=NORMAL)
         self.globalText.delete('1.0', END)
 
-        #for line in newtext:
         self.globalText.insert(END, newtext)
 
         self.globalText.config(state=DISABLED)
@@ -62,16 +62,14 @@ class DirButtonsFr(Frame):
         Frame.__init__(self, master=master)
         self.pack()
 
-        self.projDirButton = \
-            Button(self,
-                   text="Project File",
-                   takefocus=0)
+        self.projDirButton = Button(self,
+                                    text="Project File",
+                                    takefocus=0)
         self.projDirButton.pack(side=LEFT)
 
-        self.redoButton = \
-            Button(self,
-                   text="Update",
-                   takefocus=0)
+        self.redoButton = Button(self,
+                                 text="Update",
+                                 takefocus=0)
         self.redoButton.pack(side=LEFT)
 
 

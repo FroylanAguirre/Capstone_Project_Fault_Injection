@@ -74,19 +74,25 @@ class Proj_Stats:
         return isvalid
 
     def get_config_dir(self):
-        dir_path = filedialog.askdirectory(title="Select Configuration File Directory")
-
+        dir_path = filedialog.askdirectory(initialdir=os.path.dirname(self.config_sampling_dir.get()),
+                                           title="Select Configuration File Directory",
+                                           mustexist=False, )
         if dir_path:
             self.config_sampling_dir.set(dir_path)
 
     def get_sample_data_dir(self):
-        dir_path = filedialog.askdirectory(title="Select Sample Data Directory")
-
+        print("sample_dir:", os.path.dirname(self.sample_dir.get()))
+        dir_path = filedialog.askdirectory(initialdir=os.path.dirname(self.sample_dir.get()),
+                                           title="Select Sampling Data Directory",
+                                           mustexist=False, )
         if dir_path:
             self.sample_dir.set(dir_path)
 
     def get_opencd_exe_dir(self):
-        dir_path = filedialog.askdirectory(title="Select openocd.exe Directory")
+        print("openocd_exe_dir:", os.path.dirname(self.openocdExe_dir.get()))
+        dir_path = filedialog.askdirectory(initialdir=os.path.dirname(self.openocdExe_dir.get()),
+                                           title="Select openocd.exe Directory",
+                                           mustexist=False,)
 
         if dir_path:
             self.openocdExe_dir.set(dir_path)
@@ -116,6 +122,7 @@ class Proj_Stats:
         parent_dir = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
         self.config_sampling_dir = StringVar()
         self.config_sampling_dir.set(os.path.join(parent_dir, "fi_config").replace("\\","/"))
+
         self.sample_dir = StringVar()
         self.sample_dir.set(os.path.join(parent_dir, "sample_analysis").replace("\\","/"))
         self.openocdExe_dir = StringVar()
