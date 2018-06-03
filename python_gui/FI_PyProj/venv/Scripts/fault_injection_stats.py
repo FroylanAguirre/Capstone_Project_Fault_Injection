@@ -177,7 +177,7 @@ class FaultInjectionStats:
 
     def write_sampling_list(self, sl_file):
         for var in self.mem_map.selected_globals.sampling_list:
-            if var.sample:
+            if var.sample or var.critical:
                 sl_file.write(hex(var.addr) + " 8 " + str(var.size) + "\n")
 
     def write_sample_analysis_file(self, sa_file):

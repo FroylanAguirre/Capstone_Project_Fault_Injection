@@ -1,0 +1,6 @@
+first 0x20000084 4 sample
+b1 0x20000098 4 sample
+a1 0x2000009c 4 critical
+array2 0x200000e4 4000 sample
+array1 0x20001084 4000 sample
+result 0x20002024 4000 sample

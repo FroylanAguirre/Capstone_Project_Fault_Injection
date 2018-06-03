@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
-from enum import Enum
 import re
+import matplotlib.pyplot as plt
 
 MAX_STACK_ADDR = 0x20030000
 
@@ -26,7 +26,44 @@ class SampleParser:
         self.heapCnt = None
         self.seq_loss_errs = None
 
-    def parse_sample_file(self, sample_file):
+    # return a list of critical heap variables
+    def parse_analysis_file(self, analysis_file):
+        var_stats = []
+        with open(analysis_file) as sa_f:
+            content = sa_f.readlines()
+
+        content = [x.strip("\n") for x in content]
+        for line in content:
+            var = line.split(" ")
+            if var[-1] == "critical":
+                var_stats.append(True)
+            else:
+                var_stats.append(False)
+
+        return var_stats
+        # critical_addrs = []
+        # latent_addrs = []
+        #
+        # with open(analysis_file) as sa_f:
+        #     content = sa_f.readlines()
+        #
+        # # you may also want to remove whitespace characters like `\n` at the end of each line
+        # content = [x.strip("\n") for x in content]
+        # for line in content:
+        #     var = line.split(" ")
+        #     addr = int(var[1], 16)
+        #     size = int(var[2])
+        #     for i in range(size):
+        #         if var[-1] == "critical":
+        #             critical_addrs.append(addr)
+        #         else:
+        #             latent_addrs.append(addr)
+        #
+        #         addr += 1
+        #
+        # return critical_addrs, latent_addrs
+
+    def parse_sample_file(self, sample_file, analysis_file):
         print("hello")
         self.sample_file = sample_file
         self.num_samples = 0
@@ -38,6 +75,17 @@ class SampleParser:
         self.heapCnt = []
         self.seq_loss_errs = []
         plot_list = []
+
+        print("ANANLSLLSLS FILE: ", analysis_file)
+
+        critical_vars = self.parse_analysis_file(analysis_file)
+
+        # critical_list, latent_list = self.parse_analysis_file(analysis_file)
+        # print("critical list : ", critical_list)
+        # print("latent list: ", latent_list)
+        # plt.plot(critical_list, "ro")
+        # plt.plot(latent_list, "bo")
+        # plt.show()
 
         print("opening sample file")
 
@@ -58,6 +106,7 @@ class SampleParser:
 
                 self.heapCnt = self.diff_heap(samples[0], samples[idx], self.num_global_var)
                 self.heap_err.append(self.heapCnt)
+                print("YOOOOOOOOOOOOO: ", self.heapCnt)
 
                 addrErrs = self.addr_errs(samples[0], samples[idx], addrErrs)
 
@@ -68,11 +117,31 @@ class SampleParser:
             addrs = []
             tims = []
             errs = []
+            critical_errs = []
+            latent_errs = []
 
+            # iterate through all samples
             for i in range(len(self.heap_err)):
-                errs.append(self.heap_err[i][0][0])
                 addrs.append(self.heap_err[i][1])
                 tims.append(self.heap_err[i][2])
+
+                critical_err_cnt = 0
+                latent_err_cnt = 0
+                # iterate through each global variable in the sample
+                for j in range(self.num_global_var):
+
+                    # check if the variable is critical data
+                    if critical_vars[j]:
+                        critical_err_cnt += self.heap_err[i][0][j]
+                    else:
+                        latent_err_cnt += self.heap_err[i][0][j]
+
+                critical_errs.append(critical_err_cnt)
+                latent_errs.append(latent_err_cnt)
+                errs.append(critical_err_cnt + latent_err_cnt)
+
+            print("critical errs: ", critical_errs)
+            print("latent errs: ", latent_errs)
 
             for i in range(len(addrs)):
                 if addrs[i] > 536875140:
@@ -89,6 +158,8 @@ class SampleParser:
             plot_list.append(addrs)
             plot_list.append(tims)
             plot_list.append(errs)
+            plot_list.append(critical_errs)
+            plot_list.append(latent_errs)
             return plot_list
 
         except (IndexError, ET.ParseError) as e:
@@ -140,15 +211,18 @@ class SampleParser:
 
         return errCount
 
-    def diff_heap(self, sampleA, sampleB, numHeap):
+    def diff_heap(self, sampleA, sampleB, num_global_vars):
+
         errCount = []
-        for idx in range(0, numHeap):
+        for idx in range(0, num_global_vars):
             val_listA = sampleA[HEAP_SUBIDX][idx].text.split(' ')
             val_listB = sampleB[HEAP_SUBIDX][idx].text.split(' ')
             errCount.append(self.diff_string_list(val_listA, val_listB))
 
-        return errCount, int(re.search(r'\d+', sampleB[0].text).group()), int(
-            re.search(r'\d+', sampleB[1].text).group())  # a list of error counts for each global var in the heap
+        inj_addr = int(re.search(r'\d+', sampleB[0].text).group())
+        inj_time = int(re.search(r'\d+', sampleB[1].text).group())
+
+        return errCount, inj_addr, inj_time
 
     def addr_errs(self, sampleA, sampleB, addrCount):
         val_listA = sampleA[HEAP_SUBIDX][0].text.split(' ')

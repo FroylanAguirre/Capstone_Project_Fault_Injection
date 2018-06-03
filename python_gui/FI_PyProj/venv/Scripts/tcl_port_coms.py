@@ -16,6 +16,7 @@ class Tcl_Port:
     def tclPortConnect(self):
         # add subprocess here
         print ("connecting TCL port...")
+        print("file path: ", self.filepath)
         self.p = subprocess.Popen(self.filepath, shell=True, stdout=subprocess.PIPE)
 
         # print (p.returncode) # is 0 if success
@@ -111,6 +112,8 @@ class Tcl_Port:
     def __init__(self):
         self.p = None
         self.isConnected = False
-        self.filepath = "C:/Ac6/SystemWorkbench/plugins/fr.ac6.mcu.debug_2.1.1.201708311556/resources/openocd/scripts/tools/Capstone_Project_Fault_Injection/python_gui/FI_PyProj/venv/BatchFiles/fault_inj.bat"
+        self.filepath = "C:/Ac6/SystemWorkbench/plugins/fr.ac6.mcu.debug_2.1.1.201708311556/resources/openocd/" \
+                        "scripts/tools/Capstone_Project_Fault_Injection/python_gui/FI_PyProj/venv/BatchFiles/" \
+                        "fault_inj.bat"
         
 

@@ -201,6 +201,7 @@ class MemoryMapCanvas(Canvas):
         widget_id = event.widget.find_closest(event.x, event.y)
         tag_str = self.itemcget(widget_id, "tag")  # returns (widget tag) and "current" separated by a space
         tag_str = tag_str.split()[0]
+        print("tag string: ", tag_str)
 
         # update sample status of associated global var
         self.selected_globals.update_sample(tag_str.replace("_sample", ""))
@@ -222,6 +223,7 @@ class MemoryMapCanvas(Canvas):
         widget_id = event.widget.find_closest(event.x, event.y)
         tag_str = self.itemcget(widget_id, "tag")  # returns (widget tag) and "current" separated by a space
         tag_str = tag_str.split()[0]
+        print("tag string: ", tag_str)
 
         # update critical status of associated global var
         self.selected_globals.update_critical(tag_str.replace("_critical", ""))
@@ -324,22 +326,22 @@ class GlobalVarSampling:
         print("\nsampling list: ")
         for var in self.sampling_list:
             if var.critical:
-                print(var.name, "is critical")
+                print(var.name, " is critical")
             elif var.sample:
-                print(var.name, "is sampling")
+                print(var.name, " is sampling")
             else:
-                print(var.name, "is not being sampled")
+                print(var.name, " is not being sampled")
         print("\n")
 
     def update_vars(self, global_name, operation):
         # global_var = SingleGlobalVar(global_name)
         my_var = None
-        self.print_sampling_list()
         print("update var: ", global_name)
         for var in self.sampling_list:
             if var.name == global_name:
-                print("var found")
+                print("var found: ", var.name)
                 my_var = var
+                break
 
         if my_var is None:
             print("var not found")
@@ -350,7 +352,7 @@ class GlobalVarSampling:
         elif operation == "sample":
             my_var.set_sample()
 
-
+        self.print_sampling_list()
 
         # try:
         #     idx = self.sampling_list.index(global_var)
